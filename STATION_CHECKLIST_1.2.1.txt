@@ -1,0 +1,245 @@
+STATION DELIVERY CHECKLIST
+For Station 1.2.1 repositories · Use before every completion, release, or handoff
+==============================================================================
+
+HOW TO USE
+- Work top to bottom. Every box must be [x] or marked N/A with a reason.
+- "Generated" means a tool writes it. It carries a "do not edit" header, and
+  a --check mode fails `make validate` and CI when the file is stale.
+- Paths are relative to the repository root. <name> is the manifest id;
+  <version> is the semver in station.json.
+- A monorepo still owes the static outputs below. §5 says its apps are its
+  public surface, but §11 Level 1 requires public/index.html anyway. Never
+  skip section 6 because the repository is a monorepo.
+- An internal repository is one whose station.json sets "tier": "internal"
+  (STATION §6). Where a line below says "internal:", that is what such a
+  repository does instead.
+
+CHANGES FROM 1.1.0
+- §2: organization, role and tier added (STATION 1.2.1 §5); landing and
+  sponsor for internal repositories (correction 5).
+- §3, §6: Sponsor for internal repositories (correction 5).
+- §4: config.json names station@1.2.1.
+- §6: public/design/DESIGN.md is generated and drift-checked (correction 3).
+- §1: note on the README order and the CLI (correction 4).
+
+
+1. ROOT FILES (STATION §5)
+------------------------------------------------------------------------------
+[ ] README.md        exactly five sections, in order: name + one line, Start,
+                     Layout, Links, Sponsor. Nothing else.
+                     Note: this order is the rule. Station CLI 0.1.0 checks
+                     Sponsor first; a CLI release must match this order
+                     (correction 4), and a repository follows the checklist.
+[ ] AGENTS.md        for an agent: what to read, what to run, what never to do
+[ ] ROADMAP.md       what is next, by version
+[ ] CHANGELOG.md     what changed, by version; top entry = <version> and date
+[ ] LICENSE          present, even if it reserves all rights
+[ ] SECURITY.md      how to report a vulnerability
+[ ] CONTRIBUTORS.md  who, and how to join
+[ ] station.json     the manifest (section 2)
+[ ] .station/        the project folder (section 4)
+[ ] .github/         CI, issue and PR templates
+[ ] docs/            guides/, decisions/ (ADRs), architecture
+[ ] deploy/ (or infra/ or docker/)   Dockerfiles, compose, infra
+[ ] public/          the public surface (section 6); `site/` is accepted
+[ ] index.html       the root resource page (section 7)
+[ ] Makefile         setup · dev · build · test · validate · up · down
+                     plus: site · site-serve · dist (· e2e · shots if UI)
+Monorepo only:
+[ ] apps/            one directory per deployable
+[ ] packages/        one schema package is the source of truth
+[ ] api/openapi.yaml the HTTP contract, or `openapi` names its path
+
+
+2. MANIFEST: station.json
+------------------------------------------------------------------------------
+[ ] id, name, purpose, version, status, organization, role, landing,
+    sponsor all present; tier set when the repository is internal
+[ ] organization = the GitHub organization that owns the repository
+[ ] role names this repository only, across the group: no other repository
+    has the same role
+[ ] name = the product name people read in the UI, README, and site
+[ ] version = top CHANGELOG entry = latest git tag = every package.json
+    (including internal pins such as "@org/sdk": "<version>") = OpenAPI
+    info.version
+[ ] status is one of draft · stable · deprecated
+[ ] landing is NOT empty (§6: check fails otherwise); internal: the
+    repository's own address
+[ ] sponsor is set, or deliberately empty with an open sponsor slot shown;
+    internal: null
+[ ] shape, schema, openapi set when they differ from the defaults
+[ ] kept lists material held as received (vendored DESIGN.md, upstream files)
+[ ] public set only if public/ means something else in this repository
+
+
+3. README.md
+------------------------------------------------------------------------------
+[ ] One line under the name says what it is and who it is for
+[ ] A picture under the line: docs/screenshot.png from the running product,
+    retaken this release (a `make shots` target or equivalent)
+[ ] Start: requirements + the two or three commands + where to open it
+[ ] Layout: the §5 tree annotated for THIS repository, including public/,
+    index.html, tools/, .archives/
+[ ] Links: architecture, design system, guides, public site, API/SDK/CLI/MCP,
+    decisions, roadmap, changelog, security
+[ ] Sponsor: name, logo, one line, link; or the open-slot sentence;
+    internal: one line saying none is recorded
+[ ] Every relative link resolves on GitHub
+
+
+4. THE PROJECT FOLDER: .station/
+------------------------------------------------------------------------------
+[ ] config.json      { "scope": "project", "standard": "station@1.2.1" }
+[ ] STATUS.md        version · status · date, what passes, an Open table
+                     (item · owner · note), and a Jobs list with statuses
+[ ] jobs/<NNN>-<slug>/SESSION.md for this piece of work, with all eight
+    headings: Objective, Completed, Active, Blockers, Decisions,
+    Files changed, Verification, Next actions
+[ ] Job status is one word: PLANNED · ACTIVE · BLOCKED · DONE · ARCHIVED
+[ ] Every file in .station/ traces to a line in a standard
+
+
+5. DOCS AND DECISIONS: docs/
+------------------------------------------------------------------------------
+[ ] docs/README.md        overview page: what it is, a "you want to → read"
+                          table, the one-minute start
+[ ] docs/architecture.md  boundaries, contracts, data model, surfaces,
+                          testing strategy; mentions public/
+[ ] docs/guides/          local development, deploy, dev logins, QA
+[ ] docs/guides/dev-logins.md lists EVERY development default: accounts,
+                          passwords, secrets, tokens, ports, providers,
+                          buckets, client IDs, API keys; where each is set;
+                          whether to change it in production (§13)
+[ ] Seeded accounts follow <role>@<product>.station.center with password
+    demo-placeholder-password (§13), or the page says there are none
+[ ] tools/logins/check.js fails when a default in .env.example (or the code)
+    is missing from dev-logins.md, and runs in `make validate`
+[ ] docs/decisions/NNNN-<slug>.md: one ADR per decision made this release
+    (Status · date, Context, Decision, Consequences)
+
+
+6. THE PUBLIC SURFACE: public/ (STATION §6)
+------------------------------------------------------------------------------
+Required files
+[ ] public/index.html          the landing page (hand-written)
+[ ] public/design/             DESIGN.md (generated from the pinned
+                               system, listed in `kept`, with a drift
+                               check), tokens.css, system.json (names
+                               system, brand, overrides), overrides.json,
+                               index.html (the design kit page)
+[ ] public/system/index.html   the system graph: how the parts connect,
+                               arrows from a part to what it uses, legend
+[ ] public/docs/               HTML built from docs/ + AGENTS, ROADMAP,
+                               CHANGELOG, SECURITY, CONTRIBUTORS + the HTTP
+                               API page from the OpenAPI document
+[ ] public/docs/openapi.yaml   copy of the contract (if there is an API)
+[ ] public/llm.txt             the agent entry point (below)
+[ ] public/assets/             site.css, mark/logo, fonts, media
+
+Landing page
+[ ] Value first: headline, one-paragraph lead, Start and Docs actions
+[ ] Says what the product does, how to start (commands), and the agent
+    surfaces; links to docs, design kit, system, llm.txt
+[ ] Sponsor block present (sponsors appear only here and in README);
+    internal: the same none-recorded line as the README
+[ ] Pictures show something real or are purposeful illustration; no
+    placeholder art, no stock gradients, no mock-provider output presented
+    as the product, no filler card grids
+[ ] Footer: at least two link columns + © year · name · version · license
+
+Docs site
+[ ] Sidebar grouped (Start, Guides, Reference, Decisions, Project), current
+    page marked, folds on phones
+[ ] On-this-page list from h2s; previous / next links
+[ ] Links between source files are rewritten to their pages; a repository
+    file with no page renders as code, never as a broken link
+[ ] Page titles come from each file's first heading
+
+Design kit page
+[ ] Rendered from the generated tokens file, so it cannot disagree with the
+    app: colours (both themes), type roles, space, radius, elevation
+[ ] Links to DESIGN.md, tokens.css, overrides.json, system.json
+
+llm.txt
+[ ] Name, one-line purpose, version, status
+[ ] Every page of the site as a relative path
+[ ] The AGENTS.md rules (read, run, never)
+[ ] Every MCP tool name and every HTTP operation (method · path · summary)
+[ ] Generated, not hand-written
+
+Build rules
+[ ] One static folder: no server, no build step to view, no runtime JS
+    dependency, no ad code, no CDN (fonts and icons self-hosted)
+[ ] Opens from disk: every link and asset path is relative
+[ ] Shared head, header, footer, and version come from one place (the
+    generator fills marked regions in hand-written pages)
+[ ] Every visual value is a design token; no raw colours, sizes, or fonts
+[ ] Generated pages carry a header; `tools/site --check` runs in
+    `make validate` and CI; output is deterministic (no clock, no random)
+
+
+7. THE ROOT RESOURCE PAGE: index.html at the repository root
+------------------------------------------------------------------------------
+[ ] Title "Get <Name>", one-line purpose, version · release date · license ·
+    requirements
+[ ] Numbered rows with quick links:
+      01 Run it          (start commands, local URL, guide, dev logins)
+      02 Read the docs   (public/docs/index.html, public/llm.txt)
+      03 See it          (public/index.html, design kit, system graph)
+      04 Get the source  (README, CHANGELOG, AGENTS.md, `make dist` output)
+[ ] Commands block: setup, dev, up, validate, e2e, site-serve, dist
+[ ] "Connect an agent": a ready-to-paste MCP client config and a CLI example
+[ ] Footer links: site, docs, llm.txt, README
+[ ] Uses public/assets/site.css; all links relative; generated and checked
+
+
+8. DESIGN AND CONTENT (DESIGN and CONTENT standards)
+------------------------------------------------------------------------------
+[ ] DESIGN.md with tokens exists wherever there is a UI; tokens are
+    generated from it with a drift check
+[ ] Product colour roles (content, illustration) live in overrides, not as
+    raw values
+[ ] One product name everywhere a person reads it
+[ ] No filler, no vague headings, no restated facts: one place per fact,
+    a second mention is a link
+[ ] Calls to action are one word where the product's own rules require it
+[ ] Light and dark both checked; phone width (390px) and desktop (1440px)
+    both checked; reduced motion respected
+
+
+9. QUALITY GATES
+------------------------------------------------------------------------------
+[ ] `make validate` green, and it includes, in order:
+      lockfile platform check · design-token check · site check ·
+      dev-logins check · typecheck · lint · tests
+[ ] Browser checks (`make e2e`) green against a running stack, if there is
+    a UI
+[ ] CI runs the same validate; nothing is checked only by hand
+[ ] Lockfile changed only by additions/version fields; never regenerated
+    from scratch; cross-platform binaries still present
+[ ] New dependencies justified in an ADR or the changelog
+
+
+10. ARCHIVE AND AUDIT (project rules)
+------------------------------------------------------------------------------
+[ ] Nothing questionable deleted: moved to
+    .archives/removal-safe/<descriptive-name>/ with a README stating why,
+    what replaced it, and whether restoring is safe
+[ ] .archives/removal-safe/README.md index row added
+[ ] .archives/audit-reports/NNN-<slug>.md written for this work: brief,
+    findings, what changed, verification, not done
+[ ] Initial assessment (000) and completed summary (001) exist for the repo
+
+
+11. RELEASE OUTPUT
+------------------------------------------------------------------------------
+[ ] Version bumped everywhere (section 2) and CHANGELOG entry written
+[ ] `make site` re-run after any change to docs, AGENTS.md, OpenAPI,
+    tokens, version, or changelog; public/ and index.html committed
+[ ] README picture retaken if the UI changed
+[ ] Commit with the required attribution lines
+[ ] `make dist` → dist/<name>-<version>.zip + .sha256 (tracked files only)
+[ ] Fresh-checkout test: extract the tracked files into an empty directory,
+    install from the lockfile, run every check and the build there
+[ ] Delivered: the zip, its checksum, and screenshots of what changed
